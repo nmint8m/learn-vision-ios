@@ -1,6 +1,6 @@
 //
 //  MenuVC.swift
-//  Violet
+//  DemoVision
 //
 //  Created by Tam Nguyen M. on 9/12/18.
 //  Copyright © 2018 Tam Nguyen M. All rights reserved.
@@ -21,14 +21,15 @@ final class MenuVC: UIViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        navigationController?.isNavigationBarHidden = false
+        navigationController?.isNavigationBarHidden = true
     }
 }
 
 // MARK: - Config
 extension MenuVC {
     func configTableView() {
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: Config.cell)
+        let nib = UINib(nibName: "MenuCell", bundle: Bundle.main)
+        tableView.register(nib, forCellReuseIdentifier: "MenuCell")
         tableView.dataSource = self
         tableView.delegate = self
     }
@@ -45,9 +46,9 @@ extension MenuVC: UITableViewDataSource, UITableViewDelegate {
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let section = DetectType(rawValue: indexPath.row) else { return UITableViewCell() }
-        let cell = tableView.dequeueReusableCell(withIdentifier: Config.cell, for: indexPath)
-        cell.textLabel?.text = section.title
+        guard let section = DetectType(rawValue: indexPath.row),
+            let cell = tableView.dequeueReusableCell(withIdentifier: "MenuCell" , for: indexPath) as? MenuCell else { return UITableViewCell() }
+        cell.configView(title: section.title, content: section.description)
         return cell
     }
 
@@ -61,7 +62,8 @@ extension MenuVC: UITableViewDataSource, UITableViewDelegate {
         case .breakfastDetect:
             navigationController?.pushViewController(BreakfastDetectVC(), animated: true)
         case .arIntergrated:
-            navigationController?.pushViewController(DetectAndTrackingVC(), animated: true)
+            break
+            // navigationController?.pushViewController(DetectAndTrackingVC(), animated: true)
         }
     }
 }
@@ -80,6 +82,15 @@ extension MenuVC {
             case .faceDetect: return "Face Detect"
             case .breakfastDetect: return "Breakfast Detect"
             case .arIntergrated: return "AR Intergrated"
+            }
+        }
+
+        var description: String {
+            switch self {
+            case .textDetect: return "Using VNDetectTextRectanglesRequest and VNImageRectForNormalizedRect"
+            case .faceDetect: return "Using VNDetectFaceRectanglesRequest/VNDetectFaceLandmarksRequest and VNImageRectForNormalizedRect/VNImagePointForFaceLandmarkPoint"
+            case .breakfastDetect: return "Using VNCoreMLModel and VNImageRectForNormalizedRect"
+            case .arIntergrated: return "/WIP 😂"
             }
         }
 

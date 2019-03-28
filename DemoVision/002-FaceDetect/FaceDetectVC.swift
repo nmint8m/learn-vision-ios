@@ -1,6 +1,6 @@
 //
 //  FaceDetectVC.swift
-//  Violet
+//  DemoVision
 //
 //  Created by Tam Nguyen M. on 9/11/18.
 //  Copyright © 2018 Tam Nguyen M. All rights reserved.
@@ -12,7 +12,6 @@ import AVFoundation
 
 final class FaceDetectVC: VisionBaseVC {
 
-    /*
     // MARK: - Properties
     private var requests = [VNRequest]()
 
@@ -42,7 +41,12 @@ final class FaceDetectVC: VisionBaseVC {
 // MARK: - Config
 private extension FaceDetectVC {
     func configFaceRequest() {
-        let faceRequest = VNDetectFaceRectanglesRequest { [weak self] (request, error) in
+        /*
+         VNFaceObservation, Instance Property: landmarks
+         This property's value is nil for face observations produced by a VNDetectFaceRectanglesRequest analysis. Use the VNDetectFaceLandmarksRequest class to find facial features.
+         --> Change from VNDetectFaceRectanglesRequest to VNDetectFaceLandmarksRequest
+         */
+        let faceRequest = VNDetectFaceLandmarksRequest { [weak self] (request, error) in
             guard let this = self else { return }
             DispatchQueue.main.async {
                 if let results = request.results {
@@ -56,8 +60,6 @@ private extension FaceDetectVC {
 
 // MARK: - Handle draw rectangles
 private extension FaceDetectVC {
-
-
     func drawFaceDectectResults(_ results: [Any]) {
         let observations = results.map({ $0 as? VNFaceObservation }).compactMap({ $0 })
         CATransaction.begin()
@@ -66,9 +68,19 @@ private extension FaceDetectVC {
         detectionLayer.sublayers = nil
 
         for observation in observations {
-            highlightBox(observation.boundingBox)
-            drawLandMark(feature: observation.landmarks?.faceContour, color: .brown)
-            drawLandMark(feature: observation.landmarks., color: <#T##UIColor#>)
+            let box = observation.boundingBox
+            highlightBox(box)
+            drawLandMark(box: box, feature: observation.landmarks?.faceContour, color: .brown, isClosedPath: false)
+            drawLandMark(box: box, feature: observation.landmarks?.innerLips, color: .red)
+            drawLandMark(box: box, feature: observation.landmarks?.outerLips, color: .red)
+            drawLandMark(box: box, feature: observation.landmarks?.leftEye, color: .cyan)
+            drawLandMark(box: box, feature: observation.landmarks?.rightEye, color: .cyan)
+            drawLandMark(box: box, feature: observation.landmarks?.leftEyebrow, color: .orange, isClosedPath: false)
+            drawLandMark(box: box, feature: observation.landmarks?.rightEyebrow, color: .orange, isClosedPath: false)
+            drawLandMark(box: box, feature: observation.landmarks?.nose, color: .green, isClosedPath: false)
+            drawLandMark(box: box, feature: observation.landmarks?.noseCrest, color: .green, isClosedPath: false)
+            drawLandMark(box: box, feature: observation.landmarks?.leftPupil, color: .blue)
+            drawLandMark(box: box, feature: observation.landmarks?.rightPupil, color: .blue)
         }
 
         updateLayerGeometry()
@@ -102,29 +114,55 @@ private extension FaceDetectVC {
         return layer
     }
 
-//    CAShapeLayer *line = [CAShapeLayer layer];
-//    UIBezierPath *linePath=[UIBezierPath bezierPath];
-//    [linePath moveToPoint: pointA];
-//    [linePath addLineToPoint:pointB];
-//    line.path=linePath.CGPath;
-//    line.fillColor = nil;
-//    line.opacity = 1.0;
-//    line.strokeColor = [UIColor redColor].CGColor;
-//    [layer addSublayer:line];
-//}
-
-    func drawLandMark(feature: VNFaceLandmarkRegion2D?, color: UIColor) {
+    func drawLandMark(box: CGRect, feature: VNFaceLandmarkRegion2D?, color: UIColor, isClosedPath: Bool = true) {
         guard let feature = feature else { return }
+        let line = CAShapeLayer()
+        let linePath = UIBezierPath(rect: detectionLayer.bounds)
+        var firstDestinatePoint: CGPoint?
 
-        
+        print("POINT OF FEATURE")
         for i in 0...feature.pointCount - 1 {
-            let point = feature.point(at: i)
-            if i == 0 {
-                context?.move(to: CGPoint(x: x + CGFloat(point.x) * w, y: y + CGFloat(point.y) * h))
+            print("POINT \(i): \(feature.normalizedPoints[i])")
+        }
+        print("----------------------------")
+        print("EXIFORIENTATION: \(exifOrientation)")
+        print("BOUNDING BOX: \(box)")
+        print("----------------------------")
+
+        for i in 0...feature.pointCount - 1 {
+            let point = feature.normalizedPoints[i]
+            let vector = vector_float2(x: Float(point.x),
+                                       y: Float(point.y))
+            let destinatePoint: CGPoint
+            if exifOrientation == .up {
+                destinatePoint = VNImagePointForFaceLandmarkPoint(vector,
+                                                                  box,
+                                                                  Int(bufferSize.width),
+                                                                  Int(bufferSize.height))
             } else {
-                context?.addLine(to: CGPoint(x: x + CGFloat(point.x) * w, y: y + CGFloat(point.y) * h))
+                destinatePoint = VNImagePointForFaceLandmarkPoint(vector,
+                                                                  box,
+                                                                  Int(bufferSize.height),
+                                                                  Int(bufferSize.width))
             }
+
+            if i == 0 {
+                linePath.move(to: destinatePoint)
+                firstDestinatePoint = destinatePoint
+            } else {
+                linePath.addLine(to: destinatePoint)
+            }
+
+            if let closePoint = firstDestinatePoint,
+                i == feature.pointCount - 1, isClosedPath {
+                linePath.addLine(to: closePoint)
+            }
+
+            line.path = linePath.cgPath
+            line.fillColor = nil
+            line.strokeColor = color.cgColor
+            line.opacity = 1
+            detectionLayer.addSublayer(line)
         }
     }
- */
 }

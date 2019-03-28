@@ -1,6 +1,6 @@
 //
 //  UIViewControllerExt.swift
-//  Violet
+//  DemoVision
 //
 //  Created by Tam Nguyen M. on 12/20/18.
 //  Copyright © 2018 Tam Nguyen M. All rights reserved.

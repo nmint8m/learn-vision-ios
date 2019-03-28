@@ -1,6 +1,6 @@
 //
 //  BreakfastVC.swift
-//  Violet
+//  DemoVision
 //
 //  Created by Tam Nguyen M. on 12/20/18.
 //  Copyright © 2018 Tam Nguyen M. All rights reserved.
@@ -89,9 +89,6 @@ private extension BreakfastDetectVC {
             if let topLabel = observation.labels.first {
                 highlightBox(observation.boundingBox)
                 detectedObjects += "\(topLabel.identifier), \(topLabel.confidence)\n"
-//                addTag(observation.boundingBox,
-//                       identify: topLabel.identifier,
-//                       confidence: topLabel.confidence)
                 print("\(topLabel.identifier)\(topLabel.confidence)")
             }
         }

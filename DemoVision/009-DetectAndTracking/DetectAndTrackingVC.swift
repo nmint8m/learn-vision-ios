@@ -1,6 +1,6 @@
 //
 //  DetectAndTrackingVC.swift
-//  Violet
+//  DemoVision
 //
 //  Created by Tam Nguyen M. on 9/16/18.
 //  Copyright © 2018 Tam Nguyen M. All rights reserved.
@@ -29,11 +29,6 @@ class DetectAndTrackingVC: UIViewController {
         configTapGesture()
         sceneView.delegate = self
         sceneView.session.delegate = self
-
-        // Hook up status view controller callback(s).
-//        statusViewController.restartExperienceHandler = { [unowned self] in
-//            self.restartExperience()
-//        }
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -78,8 +73,6 @@ class DetectAndTrackingVC: UIViewController {
         let configuration = ARWorldTrackingConfiguration()
         configuration.detectionImages = referenceImages
         session.run(configuration, options: [.resetTracking, .removeExistingAnchors])
-
-//        statusViewController.scheduleMessage("Look around to detect images", inSeconds: 7.5, messageType: .contentPlacement)
     }
 
     var imageHighlightAction: SCNAction {
@@ -130,8 +123,6 @@ extension DetectAndTrackingVC: ARSCNViewDelegate {
         DispatchQueue.main.async {
             let imageName = referenceImage.name ?? "No image"
             print(imageName)
-//            self.statusViewController.cancelAllScheduledMessages()
-//            self.statusViewController.showMessage("Detected image “\(imageName)”")
         }
     }
 }
@@ -142,14 +133,10 @@ extension DetectAndTrackingVC: ARSessionDelegate {
 
     // MARK: - Error handling
     func displayErrorMessage(title: String, message: String) {
-        //        // Blur the background.
-        //        blurView.isHidden = false
-        //
         // Present an alert informing about the error that has occurred.
         let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
         let restartAction = UIAlertAction(title: "Restart Session", style: .default) { _ in
             alertController.dismiss(animated: true, completion: nil)
-            //            self.blurView.isHidden = true
             self.resetTracking()
         }
         alertController.addAction(restartAction)
@@ -161,9 +148,6 @@ extension DetectAndTrackingVC: ARSessionDelegate {
     func restartExperience() {
         guard isRestartAvailable else { return }
         isRestartAvailable = false
-        //
-        //        statusViewController.cancelAllScheduledMessages()
-        //
         resetTracking()
 
         // Disable restart for a while in order to give the session time to restart.
@@ -173,16 +157,7 @@ extension DetectAndTrackingVC: ARSessionDelegate {
     }
 
     // MARK: - ARSessionDelegate
-    func session(_ session: ARSession, cameraDidChangeTrackingState camera: ARCamera) {
-        //        statusViewController.showTrackingQualityInfo(for: camera.trackingState, autoHide: true)
-        //
-        //        switch camera.trackingState {
-        //        case .notAvailable, .limited:
-        //            statusViewController.escalateFeedback(for: camera.trackingState, inSeconds: 3.0)
-        //        case .normal:
-        //            statusViewController.cancelScheduledMessage(for: .trackingStateEscalation)
-        //        }
-    }
+    func session(_ session: ARSession, cameraDidChangeTrackingState camera: ARCamera) {}
 
     func session(_ session: ARSession, didFailWithError error: Error) {
         guard error is ARError else { return }
@@ -202,18 +177,9 @@ extension DetectAndTrackingVC: ARSessionDelegate {
         }
     }
 
-    func sessionWasInterrupted(_ session: ARSession) {
-        //        blurView.isHidden = false
-        //        statusViewController.showMessage("""
-        //        SESSION INTERRUPTED
-        //        The session will be reset after the interruption has ended.
-        //        """, autoHide: false)
-    }
+    func sessionWasInterrupted(_ session: ARSession) { }
 
     func sessionInterruptionEnded(_ session: ARSession) {
-        //        blurView.isHidden = true
-        //        statusViewController.showMessage("RESETTING SESSION")
-        //
         restartExperience()
     }
 
